@@ -41,5 +41,32 @@ public class CalculateRootsService extends IntentService {
        for input "829851628752296034247307144300617649465159", after 20 seconds give up
 
      */
+    long current = System.currentTimeMillis();
+    long time = ((current - timeStartMs) / 1000);
+    for(int i=2; i < numberToCalculateRootsFor; i++) {
+      if (time < 20){
+        intent.putExtra("original_number", numberToCalculateRootsFor);
+        intent.putExtra("time_until_give_up_seconds", time);
+        sendBroadcast(intent.setAction("stopped_calculations"));
+        return;
+      }
+      else{
+        if(numberToCalculateRootsFor%i == 0){
+          intent.putExtra("original_number", numberToCalculateRootsFor);
+          intent.putExtra("root1", i);
+          intent.putExtra("root2", (numberToCalculateRootsFor / i));
+          sendBroadcast(intent.setAction("found_roots"));
+          return;
+        }
+        else{
+          current = System.currentTimeMillis();
+          time = ((current - timeStartMs) / 1000);
+        }
+      }
+    }
+    intent.putExtra("original_number", numberToCalculateRootsFor);
+    intent.putExtra("root1", 1);
+    intent.putExtra("root2", numberToCalculateRootsFor);
+    sendBroadcast(intent.setAction("found_roots"));
   }
 }
