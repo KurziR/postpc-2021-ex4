@@ -44,8 +44,16 @@ public class MainActivity extends AppCompatActivity {
         // text did change
         String newText = editTextUserInput.getText().toString();
         // todo: check conditions to decide if button should be enabled/disabled (see spec below)
+        if (isNumeric(newText)){
+          buttonCalculateRoots.setEnabled(true); // set button as Enabled
+        }
       }
     });
+
+//    the button behavior is:
+//    when there is no valid-number as an input in the edit-text, button is disabled
+//    when we triggered a calculation and still didn't get any result, button is disabled
+//    otherwise (valid number && not calculating anything in the BG), button is enabled
 
     // set click-listener to the button
     buttonCalculateRoots.setOnClickListener(v -> {
@@ -81,6 +89,15 @@ public class MainActivity extends AppCompatActivity {
      to show a Toast, use this code:
      `Toast.makeText(this, "text goes here", Toast.LENGTH_SHORT).show()`
      */
+  }
+
+  public static boolean isNumeric(String str) {
+    try {
+      Long.parseLong(str);
+      return true;
+    } catch(NumberFormatException e){
+      return false;
+    }
   }
 
   @Override
