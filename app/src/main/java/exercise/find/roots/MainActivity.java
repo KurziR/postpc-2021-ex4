@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
   private BroadcastReceiver broadcastReceiverForSuccess = null;
+  private BroadcastReceiver broadcastReceiverForFailure = null;
   // TODO: add any other fields to the activity as you want
 
 
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         startService(intentToOpenActivity);
       }
     };
+
     registerReceiver(broadcastReceiverForSuccess, new IntentFilter("found_roots"));
 
     /*
@@ -107,6 +109,25 @@ public class MainActivity extends AppCompatActivity {
      to show a Toast, use this code:
      `Toast.makeText(this, "text goes here", Toast.LENGTH_SHORT).show()`
      */
+    // register a broadcast-receiver to handle action "stopped_calculations"
+    broadcastReceiverForFailure = new BroadcastReceiver() {
+
+      @Override
+      public void onReceive(Context context, Intent incomingIntent) {
+        if (incomingIntent == null || !incomingIntent.getAction().equals("stopped_calculations"))
+          return;
+
+        // change states for the progress, edit-text and button as needed, so the screen can accept new input
+        progressBar.setVisibility(View.GONE); // hide progress
+        editTextUserInput.setText(""); // cleanup text in edit-text
+        editTextUserInput.setEnabled(true); // set edit-text as enabled (user can input text)
+        buttonCalculateRoots.setEnabled(false); // set button as enabled (user can click)
+
+        long timeUntilGiveUp = incomingIntent.getLongExtra("time_until_give_up_seconds", 20);
+        Toast.makeText(MainActivity.this, "calculation aborted after " +  timeUntilGiveUp + " seconds", Toast.LENGTH_SHORT).show();
+      }
+    };
+
   }
 
   public static boolean isNumeric(String str) {
