@@ -20,6 +20,11 @@ public class MainActivity extends AppCompatActivity {
 
   private BroadcastReceiver broadcastReceiverForSuccess = null;
   private BroadcastReceiver broadcastReceiverForFailure = null;
+  private long originalNum = 0;
+  private long root1 = 0;
+  private long root2 = 0;
+  private long timeUntilGiveUp = 0;
+  private boolean inCalc = false;
   // TODO: add any other fields to the activity as you want
 
 
@@ -71,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
       progressBar.setVisibility(View.VISIBLE); // show progress
       editTextUserInput.setEnabled(false); // set edit-text as disabled (user cant input text)
       buttonCalculateRoots.setEnabled(false); // set button as disabled (user can't click)
+      inCalc = true;
     });
 
     // register a broadcast-receiver to handle action "found_roots"
@@ -87,16 +93,17 @@ public class MainActivity extends AppCompatActivity {
         editTextUserInput.setText(""); // cleanup text in edit-text
         editTextUserInput.setEnabled(true); // set edit-text as enabled (user can input text)
         buttonCalculateRoots.setEnabled(true); // set button as enabled (user can click)
+        inCalc = false;
 
-
-        String originulNum = incomingIntent.getStringExtra("original_number");
-        long originulNumAsLong = 0;
-        originulNumAsLong = Long.parseLong(originulNum);
-        long root1 = incomingIntent.getLongExtra("root1", 1);
-        long root2 = incomingIntent.getLongExtra("root2", originulNumAsLong);
-        Intent intentToOpenActivity = new Intent(MainActivity.this, MainActivity.class);
-        intentToOpenActivity.putExtra("first_root", root1);
-        intentToOpenActivity.putExtra("second_root", root2);
+        originalNum = incomingIntent.getLongExtra("original_number", originalNum);
+        root1 = incomingIntent.getLongExtra("root1", 1);
+        root2 = incomingIntent.getLongExtra("root2", originalNum);
+        timeUntilGiveUp = incomingIntent.getLongExtra("time_until_give_up_seconds", 20);
+        Intent intentToOpenActivity = new Intent(MainActivity.this, MainActivityR.class);
+        intentToOpenActivity.putExtra("original_number", originalNum);
+        intentToOpenActivity.putExtra("root1", root1);
+        intentToOpenActivity.putExtra("root2", root2);
+        intentToOpenActivity.putExtra("time_until_give_up_seconds", timeUntilGiveUp);
         startService(intentToOpenActivity);
       }
     };
@@ -121,9 +128,10 @@ public class MainActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE); // hide progress
         editTextUserInput.setText(""); // cleanup text in edit-text
         editTextUserInput.setEnabled(true); // set edit-text as enabled (user can input text)
-        buttonCalculateRoots.setEnabled(false); // set button as enabled (user can click)
+        buttonCalculateRoots.setEnabled(true); // set button enabled (user can click)
+        inCalc = false;
 
-        long timeUntilGiveUp = incomingIntent.getLongExtra("time_until_give_up_seconds", 20);
+        timeUntilGiveUp = incomingIntent.getLongExtra("time_until_give_up_seconds", 20);
         Toast.makeText(MainActivity.this, "calculation aborted after " +  timeUntilGiveUp + " seconds", Toast.LENGTH_SHORT).show();
       }
     };
@@ -157,12 +165,38 @@ public class MainActivity extends AppCompatActivity {
   protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     // TODO: put relevant data into bundle as you see fit
+    outState.putLong("original_number", originalNum);
+    outState.putLong("roo1", root1);
+    outState.putLong("root2", root2);
+    outState.putLong("time_until_give_up_seconds", timeUntilGiveUp);
   }
 
   @Override
   protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     // TODO: load data from bundle and set screen state (see spec below)
+    this.originalNum = savedInstanceState.getLong("original_number");
+    this.root1 = savedInstanceState.getLong("roo1");
+    this.root2 = savedInstanceState.getLong("root2");
+    this.timeUntilGiveUp = savedInstanceState.getLong("time_until_give_up_seconds");
+
+    ProgressBar progressBar = findViewById(R.id.progressBar);
+    EditText editTextUserInput = findViewById(R.id.editTextInputNumber);
+    Button buttonCalculateRoots = findViewById(R.id.buttonCalculateRoots);
+
+    // set continue UI:
+    if(inCalc) {
+      progressBar.setVisibility(View.VISIBLE); // show progress
+      editTextUserInput.setEnabled(false); // set edit-text as disabled (user cant input text)
+      buttonCalculateRoots.setEnabled(false); // set button as disabled (user can't click)
+    }
+    else {
+      progressBar.setVisibility(View.GONE); // hide progress
+      //editTextUserInput.setText(""); // cleanup text in edit-text
+      //editTextUserInput.setText(editTextUserInput.getText().toString());
+      editTextUserInput.setEnabled(true); // set edit-text as enabled (user can input text)
+      buttonCalculateRoots.setEnabled(true); // set button as enabled (user can click)
+    }
   }
 }
 
