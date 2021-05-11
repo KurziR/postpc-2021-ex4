@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(MainActivity.this, "calculation aborted after " +  timeUntilGiveUp + " seconds", Toast.LENGTH_SHORT).show();
       }
     };
-
+    registerReceiver(broadcastReceiverForFailure, new IntentFilter("stopped_calculations"));
   }
 
   public static boolean isNumeric(String str) {
@@ -150,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
     // todo: remove ALL broadcast receivers we registered earlier in onCreate().
     //  to remove a registered receiver, call method `this.unregisterReceiver(<receiver-to-remove>)`
     unregisterReceiver(broadcastReceiverForSuccess);
+    unregisterReceiver(broadcastReceiverForFailure);
   }
 
   @Override
