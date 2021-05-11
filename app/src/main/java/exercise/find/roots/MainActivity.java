@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     editTextUserInput.setEnabled(true); // set edit-text as enabled (user can input text)
     buttonCalculateRoots.setEnabled(false); // set button as disabled (user can't click)
 
+
+
     // set listener on the input written by the keyboard to the edit-text
     editTextUserInput.addTextChangedListener(new TextWatcher() {
       public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -43,27 +46,30 @@ public class MainActivity extends AppCompatActivity {
       public void afterTextChanged(Editable s) {
         // text did change
         String newText = editTextUserInput.getText().toString();
-        // todo: check conditions to decide if button should be enabled/disabled (see spec below)
         if (isNumeric(newText)){
-          buttonCalculateRoots.setEnabled(true); // set button as Enabled
+          buttonCalculateRoots.setEnabled(true);
+        }
+        else{
+          buttonCalculateRoots.setEnabled(false);
         }
       }
     });
-
-//    the button behavior is:
-//    when there is no valid-number as an input in the edit-text, button is disabled
-//    when we triggered a calculation and still didn't get any result, button is disabled
-//    otherwise (valid number && not calculating anything in the BG), button is enabled
 
     // set click-listener to the button
     buttonCalculateRoots.setOnClickListener(v -> {
       Intent intentToOpenService = new Intent(MainActivity.this, CalculateRootsService.class);
       String userInputString = editTextUserInput.getText().toString();
-      // todo: check that `userInputString` is a number. handle bad input. convert `userInputString` to long
-      long userInputLong = 0; // todo this should be the converted string from the user
+      if (!isNumeric(userInputString)) {
+        Toast.makeText(this, "Bad input", Toast.LENGTH_SHORT).show();
+      }
+      long userInputLong = 0;
+      userInputLong = Long.parseLong(userInputString);
       intentToOpenService.putExtra("number_for_service", userInputLong);
       startService(intentToOpenService);
-      // todo: set views states according to the spec (below)
+      // change states for the progress, edit-text and button as needed, so user can't interact with the screen
+      progressBar.setVisibility(View.VISIBLE); // show progress
+      editTextUserInput.setEnabled(false); // set edit-text as disabled (user cant input text)
+      buttonCalculateRoots.setEnabled(false); // set button as disabled (user can't click)
     });
 
     // register a broadcast-receiver to handle action "found_roots"
@@ -74,11 +80,23 @@ public class MainActivity extends AppCompatActivity {
         // success finding roots!
         /*
          TODO: handle "roots-found" as defined in the spec (below).
-          also:
-           - the service found roots and passed them to you in the `incomingIntent`. extract them.
-           - when creating an intent to open the new-activity, pass the roots as extras to the new-activity intent
-             (see for example how did we pass an extra when starting the calculation-service)
          */
+        // change states for the progress, edit-text and button as needed, so the screen can accept new input
+        progressBar.setVisibility(View.GONE); // hide progress
+        editTextUserInput.setText(""); // cleanup text in edit-text
+        editTextUserInput.setEnabled(true); // set edit-text as enabled (user can input text)
+        buttonCalculateRoots.setEnabled(true); // set button as enabled (user can click)
+
+
+        String originulNum = incomingIntent.getStringExtra("original_number");
+        long originulNumAsLong = 0;
+        originulNumAsLong = Long.parseLong(originulNum);
+        long root1 = incomingIntent.getLongExtra("root1", 1);
+        long root2 = incomingIntent.getLongExtra("root2", originulNumAsLong);
+        Intent intentToOpenActivity = new Intent(MainActivity.this, MainActivity.class);
+        intentToOpenActivity.putExtra("first_root", root1);
+        intentToOpenActivity.putExtra("second_root", root2);
+        startService(intentToOpenActivity);
       }
     };
     registerReceiver(broadcastReceiverForSuccess, new IntentFilter("found_roots"));
@@ -93,8 +111,13 @@ public class MainActivity extends AppCompatActivity {
 
   public static boolean isNumeric(String str) {
     try {
-      Long.parseLong(str);
-      return true;
+      long num = Long.parseLong(str);
+      if(num >= 0) { // the long isn't negative
+        return true;
+      }
+      else {
+        return false;
+      }
     } catch(NumberFormatException e){
       return false;
     }
@@ -105,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
     super.onDestroy();
     // todo: remove ALL broadcast receivers we registered earlier in onCreate().
     //  to remove a registered receiver, call method `this.unregisterReceiver(<receiver-to-remove>)`
+    unregisterReceiver(broadcastReceiverForSuccess);
   }
 
   @Override
