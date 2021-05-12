@@ -4,6 +4,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
+import java.util.concurrent.TimeUnit;
+
 public class CalculateRootsService extends IntentService {
 
 
@@ -20,50 +22,38 @@ public class CalculateRootsService extends IntentService {
       Log.e("CalculateRootsService", "can't calculate roots for non-positive input" + numberToCalculateRootsFor);
       return;
     }
-    /*
-    TODO:
-     calculate the roots.
-     check the time (using `System.currentTimeMillis()`) and stop calculations if can't find an answer after 20 seconds
-     upon success (found a root, or found that the input number is prime):
-      send broadcast with action "found_roots" and with extras:
-       - "original_number"(long)
-       - "root1"(long)
-       - "root2"(long)
-     upon failure (giving up after 20 seconds without an answer):
-      send broadcast with action "stopped_calculations" and with extras:
-       - "original_number"(long)
-       - "time_until_give_up_seconds"(long) the time we tried calculating
-
-      examples:
-       for input "33", roots are (3, 11)
-       for input "30", roots can be (3, 10) or (2, 15) or other options
-       for input "17", roots are (17, 1)
-       for input "829851628752296034247307144300617649465159", after 20 seconds give up
-
-     */
-    long current = System.currentTimeMillis();
-    long time = ((current - timeStartMs) / 1000);
+    long time = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - timeStartMs);
+    System.out.println("timeStartMs: "+ timeStartMs);
+    System.out.println("time: "+ time);
     for(int i=2; i < numberToCalculateRootsFor; i++) {
-      if (time < 20){
+      if (time > 20){
+        System.out.println("if");
         intent.putExtra("original_number", numberToCalculateRootsFor);
         intent.putExtra("time_until_give_up_seconds", time);
         sendBroadcast(intent.setAction("stopped_calculations"));
         return;
       }
       else{
-        if(numberToCalculateRootsFor%i == 0){
+        if(numberToCalculateRootsFor%i == 0) {
+          System.out.println(i);
+          System.out.println(numberToCalculateRootsFor / i);
+          System.out.println("else4");
+          intent.setAction("found_roots");
           intent.putExtra("original_number", numberToCalculateRootsFor);
           intent.putExtra("root1", i);
           intent.putExtra("root2", (numberToCalculateRootsFor / i));
-          sendBroadcast(intent.setAction("found_roots"));
+          long test = intent.getLongExtra("root1", 30);
+          System.out.println(test);
+          sendBroadcast(intent);
           return;
         }
         else{
-          current = System.currentTimeMillis();
-          time = ((current - timeStartMs) / 1000);
+          System.out.println("here3");
+          time = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - timeStartMs);
         }
       }
     }
+    System.out.println("reut");
     intent.putExtra("original_number", numberToCalculateRootsFor);
     intent.putExtra("root1", 1);
     intent.putExtra("root2", numberToCalculateRootsFor);

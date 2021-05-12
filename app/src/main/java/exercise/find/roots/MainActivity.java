@@ -85,12 +85,10 @@ public class MainActivity extends AppCompatActivity {
       public void onReceive(Context context, Intent incomingIntent) {
         if (incomingIntent == null || !incomingIntent.getAction().equals("found_roots")) return;
         // success finding roots!
-        /*
-         TODO: handle "roots-found" as defined in the spec (below).
-         */
         // change states for the progress, edit-text and button as needed, so the screen can accept new input
+        System.out.println(incomingIntent.getLongExtra("root1",0));
         progressBar.setVisibility(View.GONE); // hide progress
-        editTextUserInput.setText(""); // cleanup text in edit-text
+        //editTextUserInput.setText(""); // cleanup text in edit-text
         editTextUserInput.setEnabled(true); // set edit-text as enabled (user can input text)
         buttonCalculateRoots.setEnabled(true); // set button as enabled (user can click)
         inCalc = false;
@@ -104,12 +102,11 @@ public class MainActivity extends AppCompatActivity {
         intentToOpenActivity.putExtra("root1", root1);
         intentToOpenActivity.putExtra("root2", root2);
         intentToOpenActivity.putExtra("time_until_give_up_seconds", timeUntilGiveUp);
-        startService(intentToOpenActivity);
+        startActivity(intentToOpenActivity);
       }
     };
 
     registerReceiver(broadcastReceiverForSuccess, new IntentFilter("found_roots"));
-
     /*
     todo:
      add a broadcast-receiver to listen for abort-calculating as defined in the spec (below)
@@ -123,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
       public void onReceive(Context context, Intent incomingIntent) {
         if (incomingIntent == null || !incomingIntent.getAction().equals("stopped_calculations"))
           return;
-
         // change states for the progress, edit-text and button as needed, so the screen can accept new input
         progressBar.setVisibility(View.GONE); // hide progress
         editTextUserInput.setText(""); // cleanup text in edit-text
