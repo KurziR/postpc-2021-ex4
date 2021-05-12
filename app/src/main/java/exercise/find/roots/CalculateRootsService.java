@@ -22,41 +22,36 @@ public class CalculateRootsService extends IntentService {
       Log.e("CalculateRootsService", "can't calculate roots for non-positive input" + numberToCalculateRootsFor);
       return;
     }
+    Intent rootIntent = new Intent();
     long time = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - timeStartMs);
-    System.out.println("timeStartMs: "+ timeStartMs);
-    System.out.println("time: "+ time);
     for(int i=2; i < numberToCalculateRootsFor; i++) {
       if (time > 20){
-        System.out.println("if");
-        intent.putExtra("original_number", numberToCalculateRootsFor);
-        intent.putExtra("time_until_give_up_seconds", time);
-        sendBroadcast(intent.setAction("stopped_calculations"));
+        rootIntent.setAction("stopped_calculations");
+        rootIntent.putExtra("original_number", numberToCalculateRootsFor);
+        rootIntent.putExtra("time_until_give_up_seconds", time);
+        sendBroadcast(rootIntent);
         return;
       }
       else{
         if(numberToCalculateRootsFor%i == 0) {
-          System.out.println(i);
-          System.out.println(numberToCalculateRootsFor / i);
-          System.out.println("else4");
-          intent.setAction("found_roots");
-          intent.putExtra("original_number", numberToCalculateRootsFor);
-          intent.putExtra("root1", i);
-          intent.putExtra("root2", (numberToCalculateRootsFor / i));
-          long test = intent.getLongExtra("root1", 30);
-          System.out.println(test);
-          sendBroadcast(intent);
+          long root1 = i;
+          long root2 = (numberToCalculateRootsFor / i);
+          rootIntent.setAction("found_roots");
+          rootIntent.putExtra("original_number", numberToCalculateRootsFor);
+          rootIntent.putExtra("root1", root1);
+          rootIntent.putExtra("root2", root2);
+          sendBroadcast(rootIntent);
           return;
         }
         else{
-          System.out.println("here3");
           time = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - timeStartMs);
         }
       }
     }
-    System.out.println("reut");
-    intent.putExtra("original_number", numberToCalculateRootsFor);
-    intent.putExtra("root1", 1);
-    intent.putExtra("root2", numberToCalculateRootsFor);
-    sendBroadcast(intent.setAction("found_roots"));
+    rootIntent.setAction("found_roots");
+    rootIntent.putExtra("original_number", numberToCalculateRootsFor);
+    rootIntent.putExtra("root1", 1);
+    rootIntent.putExtra("root2", numberToCalculateRootsFor);
+    sendBroadcast(rootIntent);
   }
 }
