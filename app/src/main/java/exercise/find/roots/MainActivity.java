@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
   public static boolean isNumeric(String str) {
     try {
       long num = Long.parseLong(str);
-      if(num >= 0) { // the long isn't negative
+      if(num >= 0 || num !=(int)num) { // the int isn't negative
         return true;
       }
       else {
