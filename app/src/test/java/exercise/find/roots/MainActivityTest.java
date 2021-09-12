@@ -33,8 +33,8 @@ public class MainActivityTest extends TestCase {
 
     // test: make sure that the "input" edit-text has no text
     EditText inputEditText = mainActivity.findViewById(R.id.editTextInputNumber);
-    String input = inputEditText.getText().toString();
-    assertTrue(input == null || input.isEmpty());
+    String input1 = inputEditText.getText().toString();
+    assertTrue(input1 == null || input1.isEmpty());
   }
 
   @Test

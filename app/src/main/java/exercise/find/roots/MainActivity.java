@@ -161,22 +161,20 @@ public class MainActivity extends AppCompatActivity {
   protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     // TODO: put relevant data into bundle as you see fit
-    Intent intent = getIntent();
-    intent.putExtra("original_number", originalNum);
-    intent.putExtra("roo1", root1);
-    intent.putExtra("root2", root2);
-    intent.putExtra("time_until_give_up_seconds", timeUntilGiveUp);
+    outState.putLong("original_number", originalNum);
+    outState.putLong("roo1", root1);
+    outState.putLong("root2", root2);
+    outState.putLong("time_until_give_up_seconds", timeUntilGiveUp);
   }
 
   @Override
   protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     // TODO: load data from bundle and set screen state (see spec below)
-    Intent intent = getIntent();
-    this.originalNum = intent.getLongExtra("original_number", originalNum);
-    this.root1 = intent.getLongExtra("roo1", root1);
-    this.root2 = intent.getLongExtra("root2", root2);
-    this.timeUntilGiveUp = intent.getLongExtra("time_until_give_up_seconds", timeUntilGiveUp);
+    this.originalNum = savedInstanceState.getLong("original_number");
+    this.root1 = savedInstanceState.getLong("root1");
+    this.root2 = savedInstanceState.getLong("root2");
+    this.timeUntilGiveUp = savedInstanceState.getLong("time_until_give_up_seconds");
 
     ProgressBar progressBar = findViewById(R.id.progressBar);
     EditText editTextUserInput = findViewById(R.id.editTextInputNumber);
